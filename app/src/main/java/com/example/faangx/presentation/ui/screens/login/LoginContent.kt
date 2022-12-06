@@ -1,5 +1,6 @@
 package com.example.faangx.presentation.ui.screens.login
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,18 +13,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.faangx.R
+import com.example.faangx.domain.repository.LoginDatastoreRepository
 import com.example.faangx.presentation.ui.theme.FaangxTheme
 import com.example.faangx.presentation.ui.theme.SIDE_PADDING
 import com.example.faangx.presentation.ui.theme.loginBG
 import com.example.faangx.presentation.ui.theme.text
+import com.example.faangx.presentation.viewmodel.SharedViewModel
 
 @Composable
-fun LoginContent(){
+fun LoginContent(
+    navigateToEditProfileScreen: () -> Unit,
+    sharedViewModel: SharedViewModel
+){
+
+    val context = LocalContext.current
+    val datastoreRepository = LoginDatastoreRepository(context = context)
+
+    val signInLauncher = rememberLauncherForActivityResult(
+        contract = sharedViewModel.firebaseAuthUiContract,
+        onResult = { res -> sharedViewModel.onSignInResult(
+            res,
+            navigateToEditProfileScreen,
+            datastoreRepository
+        ) }
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,7 +52,9 @@ fun LoginContent(){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                sharedViewModel.onSignInAttempt(signInLauncher)
+            },
             modifier = Modifier
                 .padding(SIDE_PADDING),
             colors = ButtonDefaults.buttonColors(
@@ -54,11 +76,3 @@ fun LoginContent(){
     }
 }
 
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun LoginContentPreview(){
-    FaangxTheme {
-        LoginContent()
-    }
-}

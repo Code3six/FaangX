@@ -1,35 +1,66 @@
 package com.example.faangx.presentation.ui.screens.editprofile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.faangx.R
 import com.example.faangx.core.components.RadioGroup
 import com.example.faangx.data.datasource.db.GenderDataSource
+import com.example.faangx.domain.repository.LoginDatastoreRepository
 import com.example.faangx.presentation.ui.theme.*
+import com.example.faangx.presentation.viewmodel.SharedViewModel
 
 @Composable
-fun EditProfileContent(){
+fun EditProfileContent(
+    navigateToProfileScreen: () -> Unit,
+    sharedViewModel: SharedViewModel
+){
+    var isError = rememberSaveable{ mutableStateOf(false)}.value
+    val context = LocalContext.current
+    val datastore = LoginDatastoreRepository(context)
     val genderList = GenderDataSource.genderList
-    var (selected, setSelected) = remember { mutableStateOf("") }
+
+    var birthday by remember { mutableStateOf(sharedViewModel.birthday.value)}
+    var bio by remember {
+        mutableStateOf(sharedViewModel.bio.value)
+    }
+
+
+    var name by remember{ mutableStateOf(sharedViewModel.name.value)}
+    var email by remember{mutableStateOf(sharedViewModel.email.value)}
+    var phone by remember{mutableStateOf(sharedViewModel.phone.value)}
+    if(phone == "No Data") phone = ""
+    var photoUrl by remember{ mutableStateOf(sharedViewModel.photoUrl.value)}
+
+    Log.d("EditProfileContent",name)
+
+    var (gender, setGender) = remember { mutableStateOf(sharedViewModel.gender.value) }
+
 
     Column(
         modifier = Modifier
@@ -39,58 +70,172 @@ fun EditProfileContent(){
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        EditProfileImage()
+        EditProfileImage(photoUrl = photoUrl)
         Spacer(modifier = Modifier.height(5.dp))
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = "",
-            onValueChange = {},
+            value = name,
+            onValueChange = {
+                name = it
+            },
             placeholder = {
                 Text(
                     text = "Name"
                 )
             },
+            textStyle = MaterialTheme.typography.montserrat16,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = null,
                     tint = MaterialTheme.colors.bgColor2
                 )
-            }
+            },
+            keyboardActions = KeyboardActions(
+                onNext = { ImeAction.Next }
+            ),
+            trailingIcon = {
+               if(isError && name.isEmpty()){
+                   Text(
+                       text = "*",
+                       color = MaterialTheme.colors.redStar
+                   )
+               }
+            },
+            singleLine = true
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = "",
-            onValueChange = {},
+            value = email,
+            onValueChange = {
+                email = it
+            },
             placeholder = {
                 Text(
                     text = "Email"
                 )
             },
+            textStyle = MaterialTheme.typography.montserrat16,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
                     contentDescription = null,
                     tint = MaterialTheme.colors.bgColor2
                 )
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { ImeAction.Next }
+            ),
+            trailingIcon = {
+                if(isError && email.isEmpty()){
+                    Text(
+                        text = "*",
+                        color = MaterialTheme.colors.redStar
+                    )
+                }
+            },
+            singleLine = true
+        )
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = phone,
+            onValueChange = {
+                phone = it
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
+            placeholder = {
+                Text(
+                    text = "Phone"
+                )
+            },
+            keyboardActions = KeyboardActions(
+                onNext = { ImeAction.Next }
+            ),
+            trailingIcon = {
+                if(isError && phone.isEmpty()){
+                    Text(
+                        text = "*",
+                        color = MaterialTheme.colors.redStar
+                    )
+                }
+            },
+            textStyle = MaterialTheme.typography.montserrat16,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.bgColor2
+                )
             }
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = "",
-            onValueChange = {},
+            value = birthday,
+            onValueChange = {
+                birthday= it
+            },
+            placeholder = {
+                Text(
+                    text = "Birthday DD/MM/YYY"
+                )
+            },
+            keyboardActions = KeyboardActions(
+                onNext = { ImeAction.Next }
+            ),
+            trailingIcon = {
+                if(isError && phone.isEmpty()){
+                    Text(
+                        text = "*",
+                        color = MaterialTheme.colors.redStar
+                    )
+                }
+            },
+            textStyle = MaterialTheme.typography.montserrat16,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.bgColor2
+                )
+            },
+            singleLine = true
+        )
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = bio,
+            onValueChange = {
+                bio = it
+            },
+            keyboardActions = KeyboardActions(
+                onNext = { ImeAction.Next }
+            ),
             placeholder = {
                 Text(
                     text = "Bio"
                 )
             },
+            textStyle = MaterialTheme.typography.montserrat16,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = null,
                     tint = MaterialTheme.colors.bgColor2
                 )
-            }
+            },
+            trailingIcon = {
+                if(isError && bio.isEmpty()){
+                    Text(
+                        text = "*",
+                        color = MaterialTheme.colors.redStar
+                    )
+                }
+            },
+            singleLine = false
         )
         Column(
             modifier = Modifier
@@ -103,28 +248,37 @@ fun EditProfileContent(){
                 style = MaterialTheme.typography.Gender,
                 color = MaterialTheme.colors.text
             )
-            RadioGroup(items = genderList, selected = selected, setSelected = setSelected)
+            RadioGroup(items = genderList, selected = gender, setSelected = setGender)
         }
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = "",
-            onValueChange = {},
-            placeholder = {
-                Text(
-                    text = "Date of birth"
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = null,
-                    tint = MaterialTheme.colors.bgColor2
-                )
-            }
-        )
+
         Spacer(modifier = Modifier.height(5.dp))
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                if(sharedViewModel.checkEditProfileInfo(
+                    name = name,
+                    email = email,
+                    photoUrl = photoUrl,
+                    gender = gender,
+                    birthday = birthday,
+                    bio = bio,
+                    phone = phone
+                )){
+                    sharedViewModel.saveEditProfile(
+                        name = name,
+                        email = email,
+                        photoUrl = photoUrl,
+                        gender = gender,
+                        birthday = birthday,
+                        bio = bio,
+                        phone = phone,
+                        datastore = datastore
+                    )
+
+                    navigateToProfileScreen()
+                } else {
+                    isError = true
+                }
+            },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.appTheme
             ),
@@ -142,35 +296,42 @@ fun EditProfileContent(){
 }
 
 @Composable
-fun EditProfileImage(){
-    Column(
-        modifier = Modifier
-            .size(100.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colors.purpleTransparent)
-            .padding(6.dp,0.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ){
-        Icon(
-            painter = painterResource(id = R.drawable.add_photo),
-            contentDescription = null,
-            tint = MaterialTheme.colors.bgColor2
-        )
-        Text(
-            text = "Add Image",
-            style = MaterialTheme.typography.century1,
-            color = MaterialTheme.colors.bgColor2,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
+fun EditProfileImage(photoUrl: String) {
+    if (photoUrl.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colors.purpleTransparent)
+                .padding(6.dp, 0.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.add_photo),
+                contentDescription = null,
+                tint = MaterialTheme.colors.bgColor2
+            )
+            Text(
+                text = "Add Image",
+                style = MaterialTheme.typography.century1,
+                color = MaterialTheme.colors.bgColor2,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
     }
-}
-
-@Composable
-@Preview
-fun EditProfileImagePreview(){
-    FaangxTheme {
-        EditProfileContent()
+    else{
+        AsyncImage(
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(100.dp),
+            model = ImageRequest.Builder(context = LocalContext.current)
+            .data(photoUrl)
+            .crossfade(true)
+            .build(),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds
+        )
     }
 }

@@ -11,34 +11,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.faangx.core.navigation.NavGraph
 import com.example.faangx.presentation.ui.theme.FaangxTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var navController: NavHostController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FaangxTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    Greeting("Android")
-                }
+                navController = rememberNavController()
+                NavGraph(navController = navController)
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String) {
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    FaangxTheme {
-        Greeting("Android")
-    }
-}

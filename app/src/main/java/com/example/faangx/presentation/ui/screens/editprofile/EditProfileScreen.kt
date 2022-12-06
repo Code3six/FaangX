@@ -4,12 +4,21 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.faangx.presentation.ui.theme.FaangxTheme
+import com.example.faangx.presentation.viewmodel.SharedViewModel
 
 @Composable
-fun EditProfileScreen(){
+fun EditProfileScreen(
+    navigateToProfileScreen: () -> Unit,
+    sharedViewModel: SharedViewModel
+){
     Scaffold(
         topBar = { EditProfileTopBar() },
-        content = { EditProfileContent() }
+        content = {
+            EditProfileContent(
+                navigateToProfileScreen = navigateToProfileScreen,
+                sharedViewModel = sharedViewModel
+            )
+        }
     )
 }
 
@@ -18,6 +27,6 @@ fun EditProfileScreen(){
 @Composable
 fun EditProfileScreenPreview(){
     FaangxTheme {
-        EditProfileScreen()
+
     }
 }
