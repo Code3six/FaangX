@@ -1,5 +1,6 @@
 package com.example.faangx.domain.model
 
+
 data class User(
     var photoUrl: String = "",
     var name: String = "",

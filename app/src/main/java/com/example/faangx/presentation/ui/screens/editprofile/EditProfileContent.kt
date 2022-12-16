@@ -1,6 +1,8 @@
 package com.example.faangx.presentation.ui.screens.editprofile
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -8,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -23,18 +24,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.faangx.R
 import com.example.faangx.core.components.RadioGroup
-import com.example.faangx.data.datasource.db.GenderDataSource
+import com.example.faangx.domain.model.Gender
 import com.example.faangx.domain.repository.LoginDatastoreRepository
 import com.example.faangx.presentation.ui.theme.*
 import com.example.faangx.presentation.viewmodel.SharedViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditProfileContent(
     navigateToProfileScreen: () -> Unit,
@@ -43,23 +43,27 @@ fun EditProfileContent(
     var isError = rememberSaveable{ mutableStateOf(false)}.value
     val context = LocalContext.current
     val datastore = LoginDatastoreRepository(context)
-    val genderList = GenderDataSource.genderList
+    val genderList = listOf(Gender.MALE.name, Gender.FEMALE.name)
 
-    var birthday by remember { mutableStateOf(sharedViewModel.birthday.value)}
+    var birthday by remember { mutableStateOf(sharedViewModel.user.value.birthday)}
     var bio by remember {
-        mutableStateOf(sharedViewModel.bio.value)
+        mutableStateOf(sharedViewModel.user.value.bio)
     }
 
-
-    var name by remember{ mutableStateOf(sharedViewModel.name.value)}
-    var email by remember{mutableStateOf(sharedViewModel.email.value)}
-    var phone by remember{mutableStateOf(sharedViewModel.phone.value)}
+    var name by remember{ mutableStateOf(sharedViewModel.user.value.name)}
+    var email by remember{mutableStateOf(sharedViewModel.user.value.email)}
+    var phone by remember{mutableStateOf(sharedViewModel.user.value.phoneNumber)}
     if(phone == "No Data") phone = ""
-    var photoUrl by remember{ mutableStateOf(sharedViewModel.photoUrl.value)}
+    var photoUrl by remember{ mutableStateOf(sharedViewModel.user.value.photoUrl)}
 
     Log.d("EditProfileContent",name)
 
-    var (gender, setGender) = remember { mutableStateOf(sharedViewModel.gender.value) }
+    Log.d("name", sharedViewModel.user.collectAsState().value.name)
+    Log.d("email", sharedViewModel.user.collectAsState().value.email)
+    Log.d("phone", sharedViewModel.user.collectAsState().value.phoneNumber)
+    Log.d("photourl", sharedViewModel.user.collectAsState().value.photoUrl)
+
+    var (gender, setGender) = remember { mutableStateOf(sharedViewModel.user.value.gender) }
 
 
     Column(

@@ -10,6 +10,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -35,17 +36,21 @@ fun SplashScreen(
     val context = LocalContext.current
     val datastore = LoginDatastoreRepository(context)
 
-    sharedViewModel.getLogin(datastore)
+    val user = sharedViewModel.user.collectAsState().value
+
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = Brush.verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colors.bgColor1,
-                    MaterialTheme.colors.bgColor2
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colors.bgColor1,
+                        MaterialTheme.colors.bgColor2
+                    )
                 )
-            )),
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
@@ -60,10 +65,15 @@ fun SplashScreen(
 
 
     LaunchedEffect(key1 = true){
+        sharedViewModel.getLogin(datastore)
         delay(3000)
-        if(sharedViewModel.checkLoggerBool()) {
+        Log.d("bio", user.bio)
+        if(sharedViewModel.checkLoggerBool() && user.bio.isEmpty()) {
             navigateToScreen("editprofile")
-        } else {
+        } else if(sharedViewModel.checkLoggerBool() && user.bio.isNotEmpty()) {
+            navigateToScreen("profile")
+        }
+        else {
             navigateToScreen("login")
         }
     }

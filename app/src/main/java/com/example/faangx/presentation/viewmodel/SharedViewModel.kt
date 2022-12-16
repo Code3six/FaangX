@@ -1,9 +1,11 @@
 package com.example.faangx.presentation.viewmodel
 
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,36 +16,28 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class SharedViewModel: ViewModel() {
 
     private var _user = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
+    val db = Firebase.firestore
+
     private var signInIntent: Intent = Intent()
     val firebaseAuthUiContract = FirebaseAuthUIActivityResultContract()
 
     private val providers = arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build())
-
-    private var _name = MutableStateFlow("")
-    val name = _name
-    private var _email = MutableStateFlow("")
-    val email = _email
-    private var _phone = MutableStateFlow("")
-    val phone = _phone
-    private var _photoUrl = MutableStateFlow("")
-    val photoUrl = _photoUrl
-
-    private var _bio = MutableStateFlow("")
-    val bio = _bio
-    var gender = mutableStateOf("")
-    private var _birthday = MutableStateFlow("")
-    val birthday = _birthday
 
     private var _isLogged = MutableStateFlow(false)
     val isLogged = _isLogged
@@ -68,6 +62,7 @@ class SharedViewModel: ViewModel() {
             birthday.isNotEmpty()
         )
     }
+
     fun onSignInResult(
         result: FirebaseAuthUIAuthenticationResult,
         navigateToProfile: () -> Unit,
@@ -100,6 +95,7 @@ class SharedViewModel: ViewModel() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun saveEditProfile(
         datastore: LoginDatastoreRepository,
         name: String,
@@ -121,86 +117,67 @@ class SharedViewModel: ViewModel() {
                 bio = bio,
                 birthday = birthday
             )
+            val user = hashMapOf(
+                "name" to name,
+                "phone" to phone,
+                "email" to email,
+                "photoUrl" to photoUrl,
+                "gender" to gender,
+                "bio" to bio,
+                "birthday" to birthday
+            )
+            db.collection("users")
+                .add(user).await()
         }
     }
 
     fun getLogin(datastore: LoginDatastoreRepository){
-        setName(datastore)
-        Log.d("getLogin", name.value)
-        setEmail(datastore)
-        setPhone(datastore)
-        setPhoto(datastore)
-        setLog(datastore)
-        setGender(datastore)
-        setBio(datastore)
-        setBirthday(datastore)
-        Log.d("getLogin", "${isLogged.value}")
+        setAll(datastore)
     }
 
     fun checkLoggerBool():Boolean{
         return isLogged.value
     }
 
-    private fun setEmail(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getEmail.collect{
-                _email.value = it
+    private fun setAll(datastore: LoginDatastoreRepository) {
+        viewModelScope.launch {
+            datastore.getEmail.collect {
+                _user.value.email = it
             }
         }
-    }
-
-    private fun setName(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getName.collect{
-                _name.value = it
-            }
-        }
-    }
-
-    private fun setLog(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getLog.collect{
+        viewModelScope.launch {
+            datastore.getLog.collect {
                 _isLogged.value = it
             }
         }
-    }
-
-    private fun setPhone(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getPhone.collect{
-                _phone.value = it
+        viewModelScope.launch {
+            datastore.getPhoto.collect {
+                _user.value.photoUrl = it
             }
         }
-    }
-
-    private fun setPhoto(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getPhoto.collect{
-                _photoUrl.value = it
+        viewModelScope.launch {
+            datastore.getName.collect {
+                _user.value.name = it
             }
         }
-    }
-
-    private fun setGender(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getGender.collect{
-                gender.value = it
+        viewModelScope.launch {
+            datastore.getPhone.collect {
+                _user.value.phoneNumber = it
             }
         }
-    }
-
-    private fun setBio(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getBio.collect{
-                _bio.value = it
+        viewModelScope.launch {
+            datastore.getGender.collect {
+                _user.value.gender = it
             }
         }
-    }
-
-    private fun setBirthday(datastore: LoginDatastoreRepository){
-        viewModelScope.launch{
-            datastore.getBirthday.collect{
-                _birthday.value = it
+        viewModelScope.launch {
+            datastore.getBio.collect {
+                _user.value.bio = it
+            }
+        }
+        viewModelScope.launch {
+            datastore.getBirthday.collect {
+                _user.value.birthday = it
             }
         }
     }
@@ -228,6 +205,7 @@ class SharedViewModel: ViewModel() {
                 gender = ""
             )
         }
+        Log.d("user", _user.value.name)
     }
 
 }

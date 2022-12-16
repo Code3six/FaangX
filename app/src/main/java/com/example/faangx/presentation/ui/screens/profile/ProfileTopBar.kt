@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,7 +24,7 @@ fun ProfileTopBar(
     sharedViewModel: SharedViewModel,
     navigateToEditProfileScreen: () -> Unit
 ){
-    val name by sharedViewModel.name.collectAsState()
+    val name = sharedViewModel.user.collectAsState().value.name
     Row(
         modifier = Modifier
             .height(APP_BAR_SIZE)

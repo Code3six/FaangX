@@ -30,13 +30,7 @@ import com.example.faangx.presentation.viewmodel.SharedViewModel
 fun ProfileContent(
     sharedViewModel: SharedViewModel
 ){
-    val user = object {
-        val email by sharedViewModel.email.collectAsState()
-        val bio by sharedViewModel.bio.collectAsState()
-        val phone by sharedViewModel.phone.collectAsState()
-        val birthday by sharedViewModel.birthday.collectAsState()
-        val photoUrl by sharedViewModel.photoUrl.collectAsState()
-    }
+    val user = sharedViewModel.user.collectAsState().value
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,7 +69,7 @@ fun ProfileContent(
                 contentDescription = null
             )
             Text(
-                text = user.phone,
+                text = user.phoneNumber,
                 fontSize = 16.sp
             )
         }
