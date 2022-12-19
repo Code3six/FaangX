@@ -117,14 +117,13 @@ class SharedViewModel: ViewModel() {
                 bio = bio,
                 birthday = birthday
             )
-            val user = hashMapOf(
-                "name" to name,
-                "phone" to phone,
-                "email" to email,
-                "photoUrl" to photoUrl,
-                "gender" to gender,
-                "bio" to bio,
-                "birthday" to birthday
+            val user = User(
+                name = name,
+                phoneNumber = phone,
+                email = email,
+                gender = gender,
+                bio = bio,
+                birthday = birthday
             )
             db.collection("users")
                 .add(user).await()
