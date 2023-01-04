@@ -1,5 +1,7 @@
 package com.example.faangx.core.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -10,6 +12,7 @@ import com.example.faangx.presentation.ui.screens.profile.ProfileScreen
 import com.example.faangx.presentation.ui.screens.splash.SplashScreen
 import com.example.faangx.presentation.viewmodel.SharedViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph(
     navController: NavHostController,

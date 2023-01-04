@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,18 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.example.faangx.R
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.faangx.core.components.AddImage
 import com.example.faangx.core.components.ProfileImage
 import com.example.faangx.core.components.RadioGroup
@@ -71,7 +65,7 @@ fun EditProfileContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colors.bgColor)
             .padding(SIDE_PADDING, CONTENT_TOP_PADDING),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -308,5 +302,15 @@ fun EditProfileImage(photoUrl: String) {
     }
     else{
         ProfileImage(photoUrl = photoUrl)
+    }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun EditProfileContentPreview(){
+    FaangxTheme {
+        EditProfileContent(navigateToProfileScreen = { /*TODO*/ }, sharedViewModel = viewModel())
     }
 }

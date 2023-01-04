@@ -29,7 +29,7 @@ fun CreateGroupChatContent(){
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colors.bgColor)
     ){
         Column(
             modifier = Modifier

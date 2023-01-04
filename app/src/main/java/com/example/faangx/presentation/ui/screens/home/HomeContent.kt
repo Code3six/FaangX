@@ -1,6 +1,9 @@
 package com.example.faangx.presentation.ui.screens.home
 
+import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -17,7 +20,7 @@ import com.example.faangx.core.components.NameAndDescription
 @Composable
 fun HomeContent(){
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.bgColor)
     ) {
         LazyColumn(modifier = Modifier
             .fillMaxSize()) {
@@ -77,10 +80,18 @@ fun TimeNotification(notification: Int){
 }
 
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun HomeContentPreview(){
+fun HomeContenNighttPreview(){
   FaangxTheme {
       HomeContent()
   }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun HomeContentPreview(){
+    FaangxTheme {
+        HomeContent()
+    }
 }

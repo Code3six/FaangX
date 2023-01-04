@@ -31,7 +31,7 @@ fun ChatContent(){
 
     Column(
         modifier = Modifier
-            .background(Color.White)
+            .background(MaterialTheme.colors.bgColor)
             .fillMaxSize()
             .padding(SIDE_PADDING, CONTENT_TOP_PADDING)
     ){

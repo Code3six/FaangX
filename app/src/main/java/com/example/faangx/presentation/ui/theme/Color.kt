@@ -1,5 +1,6 @@
 package com.example.faangx.presentation.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -40,7 +41,7 @@ val Colors.purpleTransparent: Color
 
 val Colors.loginBG: Color
     @Composable
-    get() = LIGHTERPINK
+    get() = if(isLight) LIGHTERPINK else BLACK
 
 val Colors.chatBox: Color
     @Composable
@@ -52,7 +53,7 @@ val Colors.placeholderText: Color
 
 val Colors.text: Color
     @Composable
-    get() = BLACK
+    get() = if(isLight) BLACK else Color(0xfffafafa)
 
 val Colors.editTextOutline: Color
     @Composable
@@ -64,7 +65,7 @@ val Colors.grayText: Color
 
 val Colors.redStar: Color
     @Composable
-    get() = RED
+    get() = if(isLight) RED else PINK
 
 val Colors.homeChatColor: Color
     @Composable
@@ -73,3 +74,7 @@ val Colors.homeChatColor: Color
 val Colors.homeTimeColor: Color
     @Composable
     get() = Color(0xff958F93)
+
+val Colors.bgColor: Color
+    @Composable
+    get() = if(isLight)Color.White else BLACK
