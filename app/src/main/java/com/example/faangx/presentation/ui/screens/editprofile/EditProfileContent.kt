@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.faangx.R
+import com.example.faangx.core.components.AddImage
+import com.example.faangx.core.components.ProfileImage
 import com.example.faangx.core.components.RadioGroup
 import com.example.faangx.domain.model.Gender
 import com.example.faangx.domain.repository.LoginDatastoreRepository
@@ -302,40 +304,9 @@ fun EditProfileContent(
 @Composable
 fun EditProfileImage(photoUrl: String) {
     if (photoUrl.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colors.purpleTransparent)
-                .padding(6.dp, 0.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.add_photo),
-                contentDescription = null,
-                tint = MaterialTheme.colors.bgColor2
-            )
-            Text(
-                text = "Add Image",
-                style = MaterialTheme.typography.century1,
-                color = MaterialTheme.colors.bgColor2,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        }
+       AddImage()
     }
     else{
-        AsyncImage(
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(100.dp),
-            model = ImageRequest.Builder(context = LocalContext.current)
-            .data(photoUrl)
-            .crossfade(true)
-            .build(),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds
-        )
+        ProfileImage(photoUrl = photoUrl)
     }
 }

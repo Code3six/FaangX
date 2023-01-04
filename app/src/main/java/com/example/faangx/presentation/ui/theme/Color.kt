@@ -65,3 +65,11 @@ val Colors.grayText: Color
 val Colors.redStar: Color
     @Composable
     get() = RED
+
+val Colors.homeChatColor: Color
+    @Composable
+    get() = Color(0xff7B7579)
+
+val Colors.homeTimeColor: Color
+    @Composable
+    get() = Color(0xff958F93)

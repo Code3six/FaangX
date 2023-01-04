@@ -15,7 +15,8 @@ val Roboto = FontFamily(
 )
 
 val Montserrat = FontFamily(
-    Font(R.font.montserratregular, FontWeight.Normal)
+    Font(R.font.montserratregular, FontWeight.Normal),
+    Font (R.font.montserratbold, FontWeight.Bold)
 )
 
 val CenturyGothic = FontFamily(
@@ -54,6 +55,13 @@ val Typography.montserrat16: TextStyle
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     )
+val Typography.montserratBold: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp
+    )
 
 val Typography.century1: TextStyle
     @Composable
@@ -78,6 +86,39 @@ val Typography.Gender: TextStyle
         fontWeight = FontWeight.Normal,
         fontSize = 22.sp
     )
+
+val Typography.ChatName: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Roboto,
+        fontWeight = FontWeight.Normal,
+        fontSize = 19.sp
+    )
+
+val Typography.ChatText: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Roboto,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
+    )
+
+val Typography.ChatTime: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Roboto,
+        fontWeight = FontWeight(400),
+        fontSize = 12.sp
+    )
+
+val Typography.TextTime: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Roboto,
+        fontWeight = FontWeight.Normal,
+        fontSize = 11.sp
+    )
+
 
 
 // Set of Material typography styles to start with
