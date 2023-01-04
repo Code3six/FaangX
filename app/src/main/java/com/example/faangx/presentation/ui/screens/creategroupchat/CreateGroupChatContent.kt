@@ -19,11 +19,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.faangx.core.components.AddImage
 import com.example.faangx.core.components.ChatListItem
+import com.example.faangx.core.components.ChatListItemWithCheckBox
 import com.example.faangx.presentation.ui.theme.*
 
 @Composable
 fun CreateGroupChatContent(){
 
+    val checkboxes = mutableListOf(true, true, false)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -102,8 +104,8 @@ fun CreateGroupChatContent(){
             }
         }
         LazyColumn {
-            items(3) {
-                ChatListItem()
+            items(checkboxes.size) { i ->
+                ChatListItemWithCheckBox(checkboxes[i], onCheckedChange = {checkboxes[i] = it})
                 Divider()
             }
         }
