@@ -16,6 +16,7 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +72,7 @@ class SharedViewModel: ViewModel() {
             // Successfully signed in
             val userData = FirebaseAuth.getInstance().currentUser
 
-            updateUserData(userData)
+            checkUsers(userData)
             saveLogin(datastore)
             navigateToProfile()
 
@@ -92,6 +93,21 @@ class SharedViewModel: ViewModel() {
                 bio = user.value.bio,
                 birthday = user.value.birthday
             )
+        }
+    }
+
+    private fun checkUsers(user: FirebaseUser){
+        viewModelScope.launch{
+            val users = db.collection("users")
+            users.get()
+                .addOnSuccessListener { result ->
+                    for (document in result) {
+                        Log.d("user", "${document.data}")
+                        if (user.email == document.data["email"]) {
+                            updateUserDataFs(document)
+                        } else updateUserData(user)
+                    }
+                }.await()
         }
     }
 
@@ -189,7 +205,19 @@ class SharedViewModel: ViewModel() {
 
         signInLauncher.launch(signInIntent)
     }
-
+    private fun updateUserDataFs(user: QueryDocumentSnapshot){
+        _user.update {
+            it.copy(
+                photoUrl = user.data["photoUrl"] as String,
+                name = user.data["name"] as String,
+                email = user.data["email"] as String,
+                phoneNumber = user.data["phoneNumber"] as String,
+                bio = user.data["bio"] as String,
+                birthday = user.data["birthday"] as String,
+                gender = user.data["gender"] as String
+            )
+        }
+    }
     private fun updateUserData(
         userData: FirebaseUser
     ){
