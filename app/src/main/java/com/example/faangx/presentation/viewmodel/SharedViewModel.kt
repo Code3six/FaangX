@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.faangx.domain.model.User
@@ -19,29 +18,27 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 class SharedViewModel: ViewModel() {
 
     private var _user = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
-    val db = Firebase.firestore
+    private val db = Firebase.firestore
 
     private var signInIntent: Intent = Intent()
     val firebaseAuthUiContract = FirebaseAuthUIActivityResultContract()
 
     private val providers = arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build())
 
-    private var _isLogged = MutableStateFlow(false)
-    val isLogged = _isLogged
+    private var isLogged = MutableStateFlow(false)
 
 
     fun checkEditProfileInfo(
@@ -68,16 +65,19 @@ class SharedViewModel: ViewModel() {
         result: FirebaseAuthUIAuthenticationResult,
         navigateToProfile: () -> Unit,
         datastore: LoginDatastoreRepository) {
-        if (result.resultCode == ComponentActivity.RESULT_OK) {
-            // Successfully signed in
-            val userData = FirebaseAuth.getInstance().currentUser
+        viewModelScope.launch{
+            if (result.resultCode == ComponentActivity.RESULT_OK) {
+                // Successfully signed in
+                val userData = FirebaseAuth.getInstance().currentUser
 
-            checkUsers(userData)
-            saveLogin(datastore)
-            navigateToProfile()
+                checkUsers(userData!!)
+                delay(5000)
+                saveLogin(datastore)
+                navigateToProfile()
 
-        } else {
-            Log.d("Failed", "no message")
+            } else {
+                Log.d("Failed", "no message")
+            }
         }
     }
 
@@ -102,7 +102,7 @@ class SharedViewModel: ViewModel() {
             users.get()
                 .addOnSuccessListener { result ->
                     for (document in result) {
-                        Log.d("user", "${document.data}")
+                        Log.d("checkUsers", "${document.data["email"]!!::class.simpleName}")
                         if (user.email == document.data["email"]) {
                             updateUserDataFs(document)
                         } else updateUserData(user)
@@ -162,7 +162,7 @@ class SharedViewModel: ViewModel() {
         }
         viewModelScope.launch {
             datastore.getLog.collect {
-                _isLogged.value = it
+                isLogged.value = it
             }
         }
         viewModelScope.launch {
@@ -205,25 +205,26 @@ class SharedViewModel: ViewModel() {
 
         signInLauncher.launch(signInIntent)
     }
-    private fun updateUserDataFs(user: QueryDocumentSnapshot){
-        _user.update {
-            it.copy(
-                photoUrl = user.data["photoUrl"] as String,
-                name = user.data["name"] as String,
-                email = user.data["email"] as String,
-                phoneNumber = user.data["phoneNumber"] as String,
-                bio = user.data["bio"] as String,
-                birthday = user.data["birthday"] as String,
-                gender = user.data["gender"] as String
-            )
-        }
+    private fun updateUserDataFs(userD: QueryDocumentSnapshot){
+            _user.update {
+                it.copy(
+                    photoUrl = userD.data["photoUrl"] as String,
+                    name = userD.data["name"] as String,
+                    email = userD.data["email"] as String,
+                    phoneNumber = userD.data["phoneNumber"] as String,
+                    bio = userD.data["bio"] as String,
+                    birthday = userD.data["birthday"] as String,
+                    gender = userD.data["gender"] as String
+                )
+            }
+        Log.d("updateUserDataFS", user.value.name)
     }
     private fun updateUserData(
         userData: FirebaseUser
     ){
         _user.update {
             it.copy(
-                photoUrl = userData.photoUrl.toString(),
+                photoUrl = userData.photoUrl?.toString() ?:"",
                 name = userData.displayName?:"No Data",
                 email = userData.email?:"No Data",
                 phoneNumber = userData.phoneNumber?:"",
@@ -232,7 +233,7 @@ class SharedViewModel: ViewModel() {
                 gender = ""
             )
         }
-        Log.d("user", _user.value.name)
+        Log.d("updateUserData", _user.value.name)
     }
 
 }
