@@ -17,8 +17,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.delay
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,38 +43,29 @@ class SharedViewModel: ViewModel() {
 
 
     fun checkEditProfileInfo(
-        name: String,
-        phone: String,
-        email: String,
-        photoUrl: String,
-        gender: String,
-        bio: String,
-        birthday: String
+        userInfo: User
     ):Boolean{
         return (
-            name.isNotEmpty() &&
-            phone.isNotEmpty() &&
-            email.isNotEmpty() &&
-            photoUrl.isNotEmpty() &&
-            gender.isNotEmpty() &&
-            bio.isNotEmpty() &&
-            birthday.isNotEmpty()
+            userInfo.name.isNotEmpty() &&
+            userInfo.phoneNumber.isNotEmpty() &&
+            userInfo.email.isNotEmpty() &&
+            userInfo.photoUrl.isNotEmpty() &&
+            userInfo.gender.isNotEmpty() &&
+            userInfo.bio.isNotEmpty() &&
+            userInfo.birthday.isNotEmpty()
         )
     }
 
     fun onSignInResult(
         result: FirebaseAuthUIAuthenticationResult,
-        navigateToProfile: () -> Unit,
+        navigateToEditProfileScreen: () -> Unit,
         datastore: LoginDatastoreRepository) {
         viewModelScope.launch{
             if (result.resultCode == ComponentActivity.RESULT_OK) {
                 // Successfully signed in
                 val userData = FirebaseAuth.getInstance().currentUser
 
-                checkUsers(userData!!)
-                delay(5000)
-                saveLogin(datastore)
-                navigateToProfile()
+                checkUsers(getFirebaseUser(userData!!), datastore, navigateToEditProfileScreen)
 
             } else {
                 Log.d("Failed", "no message")
@@ -81,118 +73,91 @@ class SharedViewModel: ViewModel() {
         }
     }
 
-    private fun saveLogin(datastore: LoginDatastoreRepository){
+    private fun getFirebaseUser(userData: FirebaseUser):User{
+        var userObject = User(
+            photoUrl = userData.photoUrl?.toString() ?:"",
+            name = userData.displayName?:"No Data",
+            email = userData.email?:"No Data",
+            phoneNumber = userData.phoneNumber?:"",
+            bio = "",
+            birthday = "",
+            gender = ""
+        )
+
+        return userObject
+    }
+
+    private fun saveLogin(datastore: LoginDatastoreRepository, userData: User){
         viewModelScope.launch {
             datastore.saveInfo(
-                name = user.value.name,
-                email = user.value.email,
-                photoUrl = user.value.photoUrl,
-                phone = user.value.phoneNumber,
-                log = user.value.name.isNotEmpty(),
-                gender = user.value.gender,
-                bio = user.value.bio,
-                birthday = user.value.birthday
+                userInfo = Gson().toJson(userData)
             )
+            Log.d("saveLogin", userData.name)
         }
     }
 
-    private fun checkUsers(user: FirebaseUser){
+    private fun checkUsers(user: User, datastore: LoginDatastoreRepository, navigateToEditProfileScreen: () -> Unit){
         viewModelScope.launch{
-            val users = db.collection("users")
-            users.get()
-                .addOnSuccessListener { result ->
-                    for (document in result) {
-                        Log.d("checkUsers", "${document.data["email"]!!::class.simpleName}")
-                        if (user.email == document.data["email"]) {
-                            updateUserDataFs(document)
-                        } else updateUserData(user)
+            db.collection("users")
+                .whereEqualTo("email", user.email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        saveLogin(datastore, document.toObject<User>())
+                        Log.d("checkUsers", "${document.toObject<User>()}")
                     }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w("checkUsers", "Error getting documents: ", exception)
                 }.await()
+            updateUserData(user)
+            navigateToEditProfileScreen()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun saveEditProfile(
         datastore: LoginDatastoreRepository,
-        name: String,
-        phone: String,
-        email: String,
-        photoUrl: String,
-        gender: String,
-        bio: String,
-        birthday: String
+        userInfo: User
     ){
         viewModelScope.launch {
             datastore.saveInfo(
-                name = name,
-                phone = phone,
-                email = email,
-                photoUrl = photoUrl,
-                log = true,
-                gender = gender,
-                bio = bio,
-                birthday = birthday
-            )
-            val user = User(
-                name = name,
-                phoneNumber = phone,
-                email = email,
-                gender = gender,
-                bio = bio,
-                birthday = birthday
+                userInfo = Gson().toJson(userInfo)
             )
             db.collection("users")
-                .add(user).await()
+                .add(userInfo).await()
         }
     }
 
     fun getLogin(datastore: LoginDatastoreRepository){
-        setAll(datastore)
+        setUserInfo(datastore)
     }
 
     fun checkLoggerBool():Boolean{
         return isLogged.value
     }
 
-    private fun setAll(datastore: LoginDatastoreRepository) {
+    private fun setUserInfo(datastore: LoginDatastoreRepository) {
         viewModelScope.launch {
-            datastore.getEmail.collect {
-                _user.value.email = it
-            }
-        }
-        viewModelScope.launch {
-            datastore.getLog.collect {
-                isLogged.value = it
-            }
-        }
-        viewModelScope.launch {
-            datastore.getPhoto.collect {
-                _user.value.photoUrl = it
-            }
-        }
-        viewModelScope.launch {
-            datastore.getName.collect {
-                _user.value.name = it
-            }
-        }
-        viewModelScope.launch {
-            datastore.getPhone.collect {
-                _user.value.phoneNumber = it
-            }
-        }
-        viewModelScope.launch {
-            datastore.getGender.collect {
-                _user.value.gender = it
-            }
-        }
-        viewModelScope.launch {
-            datastore.getBio.collect {
-                _user.value.bio = it
-            }
-        }
-        viewModelScope.launch {
-            datastore.getBirthday.collect {
-                _user.value.birthday = it
+            datastore.getUserInfo.collect { userInfo ->
+                Log.d("setUserInfo", "${ userInfo.isEmpty() }")
+                if(userInfo.isEmpty()){
+                    _user.update{
+                        it.copy(
+                            photoUrl = "",
+                            name = "",
+                            email = "",
+                            phoneNumber = "",
+                            bio = "",
+                            birthday = "",
+                            gender = ""
+                        )
+                    }
+                }
+                else {
+                    _user.value = Gson().fromJson(userInfo, User::class.java)
+                    Log.d("setUserInfo", "${user.value.bio}")
+                }
             }
         }
     }
@@ -205,27 +170,13 @@ class SharedViewModel: ViewModel() {
 
         signInLauncher.launch(signInIntent)
     }
-    private fun updateUserDataFs(userD: QueryDocumentSnapshot){
-            _user.update {
-                it.copy(
-                    photoUrl = userD.data["photoUrl"] as String,
-                    name = userD.data["name"] as String,
-                    email = userD.data["email"] as String,
-                    phoneNumber = userD.data["phoneNumber"] as String,
-                    bio = userD.data["bio"] as String,
-                    birthday = userD.data["birthday"] as String,
-                    gender = userD.data["gender"] as String
-                )
-            }
-        Log.d("updateUserDataFS", user.value.name)
-    }
     private fun updateUserData(
-        userData: FirebaseUser
+        userData: User
     ){
         _user.update {
             it.copy(
-                photoUrl = userData.photoUrl?.toString() ?:"",
-                name = userData.displayName?:"No Data",
+                photoUrl = userData.photoUrl ?:"",
+                name = userData.name?:"No Data",
                 email = userData.email?:"No Data",
                 phoneNumber = userData.phoneNumber?:"",
                 bio = "",

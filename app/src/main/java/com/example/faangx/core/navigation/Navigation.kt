@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.faangx.presentation.ui.screens.editprofile.EditProfileScreen
+import com.example.faangx.presentation.ui.screens.imagePicker.ImagePicker
 import com.example.faangx.presentation.ui.screens.login.LoginScreen
 import com.example.faangx.presentation.ui.screens.profile.ProfileScreen
 import com.example.faangx.presentation.ui.screens.splash.SplashScreen
@@ -49,6 +50,19 @@ fun NavGraph(
             ProfileScreen(navigateToEditProfileScreen = {
                 navController.navigate("editprofile")
             }, sharedViewModel = sharedViewModel)
+        }
+
+        composable(
+            route = "imagepicker"
+        ){
+            ImagePicker(
+                onPicked = { asset ->
+
+                },
+                onClose = { asset ->
+                    navController.navigateUp()
+                }
+            )
         }
     }
 }

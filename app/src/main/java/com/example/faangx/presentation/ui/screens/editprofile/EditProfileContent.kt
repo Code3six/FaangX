@@ -1,13 +1,14 @@
 package com.example.faangx.presentation.ui.screens.editprofile
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -26,6 +27,7 @@ import com.example.faangx.core.components.AddImage
 import com.example.faangx.core.components.ProfileImage
 import com.example.faangx.core.components.RadioGroup
 import com.example.faangx.domain.model.Gender
+import com.example.faangx.domain.model.User
 import com.example.faangx.domain.repository.LoginDatastoreRepository
 import com.example.faangx.presentation.ui.theme.*
 import com.example.faangx.presentation.viewmodel.SharedViewModel
@@ -41,23 +43,37 @@ fun EditProfileContent(
     val datastore = LoginDatastoreRepository(context)
     val genderList = listOf(Gender.MALE.name, Gender.FEMALE.name)
 
-    var birthday by remember { mutableStateOf(sharedViewModel.user.value.birthday)}
-    var bio by remember {
-        mutableStateOf(sharedViewModel.user.value.bio)
+
+
+    var user: User = User(
+        name = sharedViewModel.user.collectAsState().value.name,
+        email = sharedViewModel.user.collectAsState().value.email,
+        phoneNumber = sharedViewModel.user.collectAsState().value.phoneNumber,
+        photoUrl = sharedViewModel.user.collectAsState().value.photoUrl,
+        gender = sharedViewModel.user.collectAsState().value.gender,
+        bio = sharedViewModel.user.collectAsState().value.bio,
+        birthday = sharedViewModel.user.collectAsState().value.birthday
+    )
+
+    var name: MutableState<String> = remember {
+        mutableStateOf(user.name)
+    }
+    var email: MutableState<String> = remember {
+        mutableStateOf(user.email)
+    }
+    var phoneNumber: MutableState<String> = remember {
+        mutableStateOf(user.phoneNumber)
+    }
+    var photoUrl: MutableState<String> = remember {
+        mutableStateOf(user.photoUrl)
+    }
+    var bio: MutableState<String> = remember {
+        mutableStateOf(user.bio)
+    }
+    var birthday: MutableState<String> = remember {
+        mutableStateOf(user.birthday)
     }
 
-    var name by remember{ mutableStateOf(sharedViewModel.user.value.name)}
-    var email by remember{mutableStateOf(sharedViewModel.user.value.email)}
-    var phone by remember{mutableStateOf(sharedViewModel.user.value.phoneNumber)}
-    if(phone == "No Data") phone = ""
-    var photoUrl by remember{ mutableStateOf(sharedViewModel.user.value.photoUrl)}
-
-    Log.d("EditProfileContent",name)
-
-    Log.d("name", sharedViewModel.user.collectAsState().value.name)
-    Log.d("email", sharedViewModel.user.collectAsState().value.email)
-    Log.d("phone", sharedViewModel.user.collectAsState().value.phoneNumber)
-    Log.d("photourl", sharedViewModel.user.collectAsState().value.photoUrl)
 
     var (gender, setGender) = remember { mutableStateOf(sharedViewModel.user.value.gender) }
 
@@ -66,17 +82,22 @@ fun EditProfileContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colors.bgColor)
+            .verticalScroll(
+                rememberScrollState(),
+                true,
+                null
+            )
             .padding(SIDE_PADDING, CONTENT_TOP_PADDING),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        EditProfileImage(photoUrl = photoUrl)
+        EditProfileImage(photoUrl = photoUrl.value)
         Spacer(modifier = Modifier.height(5.dp))
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = name,
+            value = name.value,
             onValueChange = {
-                name = it
+                name.value = it
             },
             placeholder = {
                 Text(
@@ -95,7 +116,7 @@ fun EditProfileContent(
                 onNext = { ImeAction.Next }
             ),
             trailingIcon = {
-               if(isError && name.isEmpty()){
+               if(isError && name.value.isEmpty()){
                    Text(
                        text = "*",
                        color = MaterialTheme.colors.redStar
@@ -106,9 +127,9 @@ fun EditProfileContent(
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = email,
+            value = email.value,
             onValueChange = {
-                email = it
+                email.value = it
             },
             placeholder = {
                 Text(
@@ -130,7 +151,7 @@ fun EditProfileContent(
                 onNext = { ImeAction.Next }
             ),
             trailingIcon = {
-                if(isError && email.isEmpty()){
+                if(isError && email.value.isEmpty()){
                     Text(
                         text = "*",
                         color = MaterialTheme.colors.redStar
@@ -141,9 +162,9 @@ fun EditProfileContent(
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = phone,
+            value = phoneNumber.value,
             onValueChange = {
-                phone = it
+                phoneNumber.value = it
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
@@ -157,7 +178,7 @@ fun EditProfileContent(
                 onNext = { ImeAction.Next }
             ),
             trailingIcon = {
-                if(isError && phone.isEmpty()){
+                if(isError && phoneNumber.value.isEmpty()){
                     Text(
                         text = "*",
                         color = MaterialTheme.colors.redStar
@@ -175,9 +196,9 @@ fun EditProfileContent(
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = birthday,
+            value = birthday.value ,
             onValueChange = {
-                birthday= it
+                birthday.value = it
             },
             placeholder = {
                 Text(
@@ -188,7 +209,7 @@ fun EditProfileContent(
                 onNext = { ImeAction.Next }
             ),
             trailingIcon = {
-                if(isError && phone.isEmpty()){
+                if(isError && birthday.value.isEmpty()){
                     Text(
                         text = "*",
                         color = MaterialTheme.colors.redStar
@@ -207,9 +228,9 @@ fun EditProfileContent(
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = bio,
+            value = bio.value,
             onValueChange = {
-                bio = it
+                bio.value = it
             },
             keyboardActions = KeyboardActions(
                 onNext = { ImeAction.Next }
@@ -228,7 +249,7 @@ fun EditProfileContent(
                 )
             },
             trailingIcon = {
-                if(isError && bio.isEmpty()){
+                if(isError && bio.value.isEmpty()){
                     Text(
                         text = "*",
                         color = MaterialTheme.colors.redStar
@@ -255,25 +276,28 @@ fun EditProfileContent(
         Button(
             onClick = {
                 if(sharedViewModel.checkEditProfileInfo(
-                    name = name,
-                    email = email,
-                    photoUrl = photoUrl,
-                    gender = gender,
-                    birthday = birthday,
-                    bio = bio,
-                    phone = phone
+                    userInfo = User(
+                        name = name.value,
+                        email = email.value,
+                        photoUrl = photoUrl.value,
+                        phoneNumber = phoneNumber.value,
+                        bio = bio.value,
+                        birthday = birthday.value,
+                        gender = gender
+                    )
                 )){
                     sharedViewModel.saveEditProfile(
-                        name = name,
-                        email = email,
-                        photoUrl = photoUrl,
-                        gender = gender,
-                        birthday = birthday,
-                        bio = bio,
-                        phone = phone,
+                        userInfo = User(
+                            name = name.value,
+                            email = email.value,
+                            photoUrl = photoUrl.value,
+                            phoneNumber = phoneNumber.value,
+                            bio = bio.value,
+                            birthday = birthday.value,
+                            gender = gender
+                        ),
                         datastore = datastore
                     )
-
                     navigateToProfileScreen()
                 } else {
                     isError = true

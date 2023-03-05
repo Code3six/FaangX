@@ -31,8 +31,6 @@ fun LoginContent(
     navigateToEditProfileScreen: () -> Unit,
     sharedViewModel: SharedViewModel
 ){
-
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val datastoreRepository = LoginDatastoreRepository(context = context)
 
@@ -55,7 +53,6 @@ fun LoginContent(
         Button(
             onClick = {
                     sharedViewModel.onSignInAttempt(signInLauncher)
-
             },
             modifier = Modifier
                 .padding(SIDE_PADDING),

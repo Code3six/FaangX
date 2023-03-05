@@ -24,7 +24,7 @@ fun LoginTopBar(){
           .height(APP_BAR_SIZE)
           .fillMaxWidth()
           .background(MaterialTheme.colors.appTheme)
-          .padding(SIDE_PADDING),
+          .padding(SIDE_PADDING, 0.dp),
     verticalAlignment = Alignment.CenterVertically
     ){
         Text(

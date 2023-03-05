@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.faangx.presentation.ui.theme.*
 
 @Composable
@@ -21,7 +22,7 @@ fun CreateGroupChatTopBar(){
             .height(APP_BAR_SIZE)
             .fillMaxWidth()
             .background(MaterialTheme.colors.appTheme)
-            .padding(SIDE_PADDING),
+            .padding(0.dp, SIDE_PADDING),
         verticalAlignment = Alignment.CenterVertically
     ){
         Text(

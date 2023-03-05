@@ -38,8 +38,6 @@ fun SplashScreen(
 
     val user = sharedViewModel.user.collectAsState().value
 
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,13 +62,13 @@ fun SplashScreen(
     }
 
 
-    LaunchedEffect(key1 = true){
+    LaunchedEffect(key1 = user){
         sharedViewModel.getLogin(datastore)
-        delay(3000)
+        delay(5000)
         Log.d("bio", user.bio)
-        if(sharedViewModel.checkLoggerBool() && user.bio.isEmpty()) {
+        if(user.bio.isEmpty()) {
             navigateToScreen("editprofile")
-        } else if(sharedViewModel.checkLoggerBool() && user.bio.isNotEmpty()) {
+        } else if(user.bio.isNotEmpty()) {
             navigateToScreen("profile")
         }
         else {

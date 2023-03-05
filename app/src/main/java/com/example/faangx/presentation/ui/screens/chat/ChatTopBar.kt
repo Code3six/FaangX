@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.faangx.presentation.ui.theme.APP_BAR_SIZE
 import com.example.faangx.presentation.ui.theme.SIDE_PADDING
 import com.example.faangx.presentation.ui.theme.appTheme
@@ -26,7 +27,7 @@ fun ChatTopBar(){
             .height(APP_BAR_SIZE)
             .fillMaxWidth()
             .background(MaterialTheme.colors.appTheme)
-            .padding(SIDE_PADDING),
+            .padding(SIDE_PADDING, 0.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(SIDE_PADDING)
     ){
